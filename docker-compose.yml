@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  staminawarrior.server.api:
+    image: ${DOCKER_REGISTRY-}staminawarriorserverapi
+    
+    build:
+      context: .
+      dockerfile: src/Modules/Backend/Api/Dockerfile    
+    depends_on:
+        - stamina-warrior-db
+        - stamina-warrior-redis
+
+  stamina-warrior-db:
+    image: postgres:latest
+    container_name: Warrior.Db
+    environment:
+         - POSTGRES_DB=StaminaWarrior
+         - POSTGRES_USER=postgres
+         - POSTGRES_PASSWORD=postgres 
+    volumes:
+        - ./.containers/database:/var/lib/postgresql/data
+    ports:
+        - 5432:5432
+
+  stamina-warrior-redis:
+    image: redis:latest    
+    container_name: Warrior.Redis
+    restart: always
+    ports:
+      - 6379:6379
+    

@@ -1,0 +1,9 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+POST https://localhost:5001/api/warriors
+Content-Type: application/json
+
+{
+    "userId": "ecd56d04-dee0-42d8-9996-484e68af18eb",        
+    "warriorName": "Kuchtus2aaaaaaaaaaaaaaaaaaa"
+}
+
