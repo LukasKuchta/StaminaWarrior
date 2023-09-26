@@ -25,7 +25,7 @@ internal class BackendUnitOfWork : IUnitOfWork
 
             return await _applicationDbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException)
         {
             // Dont leak EFC exception into application layer 
             throw new ConcurrencyException("Concurrency update!");

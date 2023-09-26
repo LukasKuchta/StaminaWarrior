@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic.FileIO;
 using Newtonsoft.Json;
 using Polly;
+using Polly.Retry;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Backend.Infrastructure.Messaging.InternalCommands;
@@ -59,7 +60,7 @@ internal class ProcessInternalCommandsCommandHandler : IRequestHandler<ProcessIn
                 continue;
             }
 
-            var policy = Policy
+            AsyncRetryPolicy policy = Policy
             .Handle<Exception>()
             .WaitAndRetryAsync(new[]
             {
@@ -71,7 +72,7 @@ internal class ProcessInternalCommandsCommandHandler : IRequestHandler<ProcessIn
             PolicyResult result = await policy.ExecuteAndCaptureAsync(() =>
             {
                 return _commandExecutor.ExecuteCommandAsync(commandToProcess);
-            });
+            }).ConfigureAwait(false);
 
             if (result.Outcome == OutcomeType.Failure)
             {

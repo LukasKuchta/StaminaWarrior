@@ -7,8 +7,7 @@ namespace Backend.Infrastructure.Messaging.Outbox;
 internal sealed class ProcessOutboxMessagesJob : IJob
 {    
     public async Task Execute(IJobExecutionContext context)
-    {
-        Console.WriteLine("ProcessOutboxMessagesJob");
+    {        
         await CommandExecutor.ExecuteCommandAsync(new ProcessOutboxCommand()).ConfigureAwait(false);
     }
 }

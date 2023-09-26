@@ -13,12 +13,12 @@ public class BackendModule : IBackendModule
 {
     public async Task<TResult> ExecuteCommandAsync<TResult>(ICommand<TResult> command)
     {
-        return await CommandExecutor.ExecuteCommandAsync(command);
+        return await CommandExecutor.ExecuteCommandAsync(command).ConfigureAwait(false);
     }
 
     public async Task ExecuteCommandAsync(ICommand command)
     {
-        await CommandExecutor.ExecuteCommandAsync(command);
+        await CommandExecutor.ExecuteCommandAsync(command).ConfigureAwait(false);
     }
 
     public async Task<TResult> ExecuteQueryAsync<TResult>(IQuery<TResult> query)
@@ -27,7 +27,7 @@ public class BackendModule : IBackendModule
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            return await mediator.Send(query);
+            return await mediator.Send(query).ConfigureAwait(false);
         }
     }
 }

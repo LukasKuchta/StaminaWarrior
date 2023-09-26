@@ -19,19 +19,9 @@ internal static class CommandExecutor
     {
         using (IServiceScope scope = BackendCompositionRoot.CreateScope())
         {
-            IMediator mediatro = scope.ServiceProvider.GetRequiredService<IMediator>();            
-            try
-            {
+            IMediator mediatro = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            var result = await mediatro.Send<TResult>(command).ConfigureAwait(false);
-                return result;
-            } catch (Exception ex)
-            {
-
-            }
-     
-
+            return await mediatro.Send<TResult>(command).ConfigureAwait(false);
         }
-        return default(TResult);
     }
 }

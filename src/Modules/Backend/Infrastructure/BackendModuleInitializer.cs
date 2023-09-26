@@ -1,5 +1,6 @@
 ﻿using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -18,6 +19,7 @@ using Backend.Infrastructure.Messaging.DomainEvents;
 using Backend.Infrastructure.Messaging.InternalCommands;
 using Backend.Infrastructure.Messaging.Outbox;
 using Backend.Infrastructure.Messaging.PublicEvents;
+using Backend.Infrastructure.Quartz;
 using Backend.Infrastructure.Repositories;
 using Backend.Infrastructure.Serialization;
 using BuildingBlocks.Application.Data;
@@ -47,45 +49,51 @@ namespace Backend.Infrastructure;
 
 public static class BackendModuleInitializer
 {
-    private const string messageProcessingJobGroup = "MessageProcessingJobGroup";
-
     public static void Initialize(
-
         string connectionString,
         RedisOptions redisOptions,
-        ProcessOutboxMessagesOptions processOutboxMessagesOptions,
-        ProcessInternalCommandsOptions processInternalCommandsOptions)
+        ProcessOutboxMessagesOptions outboxOptions,
+        ProcessInternalCommandsOptions internalCommandsOptions)
     {
+        if (redisOptions is null)
+        {
+            throw new ArgumentNullException(nameof(redisOptions));
+        }
+
+        if (outboxOptions is null)
+        {
+            throw new ArgumentNullException(nameof(outboxOptions));
+        }
+
+        if (internalCommandsOptions is null)
+        {
+            throw new ArgumentNullException(nameof(internalCommandsOptions));
+        }
+
         var serviceCollection = new ServiceCollection();
 
         serviceCollection.AddApplication();
         serviceCollection.AddInfrastructure(
-
             connectionString,
             redisOptions,
-            processOutboxMessagesOptions,
-            processInternalCommandsOptions);
+            outboxOptions,
+            internalCommandsOptions);
 
         IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
-        AddQuartz(processInternalCommandsOptions, processOutboxMessagesOptions);
+        QuartzInitializer.Initialize(internalCommandsOptions, outboxOptions);
 
         BackendCompositionRoot.SetContainer(serviceProvider);
     }
 
+
     private static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-
-        string connectionString,
-        RedisOptions redisOptions,
-        ProcessOutboxMessagesOptions processOutboxMessagesOptions,
-        ProcessInternalCommandsOptions processInternalCommandsOptions)
+        [NotNull] string connectionString,
+        [NotNull] RedisOptions redisOptions,
+        [NotNull] ProcessOutboxMessagesOptions processOutboxMessagesOptions,
+        [NotNull] ProcessInternalCommandsOptions processInternalCommandsOptions)
     {
-        if (string.IsNullOrEmpty(connectionString))
-        {
-            throw new ConnectionStringMissingException();
-        }
-
         services.AddScoped<IRequestHandler<ProcessOutboxCommand>, ProcessOutboxCommandHandler>();
         services.AddScoped<IRequestHandler<ProcessInternalCommandsCommand>, ProcessInternalCommandsCommandHandler>();
         services.AddScoped<IInternalCommandMarker, InternalCommandMarker>();
@@ -104,7 +112,7 @@ public static class BackendModuleInitializer
 
         services.AddStackExchangeRedisCache(options =>
         {
-            options.Configuration = redisOptions.GetConnectionString();
+            options.Configuration = redisOptions.GetConnectionString;
         });
 
         services.AddSingleton<IDistributedLockFactory, RedLockFactory>(x =>
@@ -178,73 +186,11 @@ public static class BackendModuleInitializer
 
         // add jobs
         services.AddTransient<ProcessOutboxMessagesJob>();
-        services.AddTransient<ProcessInternalCommandsJob>();        
+        services.AddTransient<ProcessInternalCommandsJob>();
 
         return services;
     }
 
-    private static async Task StartSchedulerAsync(IScheduler scheduler, CancellationToken cancellationToken)
-    {
-        if (scheduler is null)
-        {
-            throw new InvalidOperationException("The scheduler should have been initialized first.");
-        }
-
-        await scheduler.Start(cancellationToken).ConfigureAwait(false);
-    }
-
-    private class UseMsServiceProviderJobFactory : IJobFactory
-    {
-        public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
-        {
-            using (IServiceScope scope =  BackendCompositionRoot.CreateScope())
-            {
-                return (IJob)scope.ServiceProvider.GetRequiredService(bundle.JobDetail.JobType);
-            }                            
-        }
-
-        public void ReturnJob(IJob job)
-        {
-            (job as IDisposable)?.Dispose();
-        }
-    }
-
-    public static async void AddQuartz(ProcessInternalCommandsOptions internalCommandsOptions,
-        ProcessOutboxMessagesOptions outboxOptions)
-    {
-        ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
-        IScheduler scheduler = await schedulerFactory.GetScheduler();
-        scheduler.JobFactory = new UseMsServiceProviderJobFactory();
-        await scheduler.Start();
-
-        var outboxJob = JobBuilder.Create<ProcessOutboxMessagesJob>().WithIdentity(nameof(ProcessOutboxMessagesJob), messageProcessingJobGroup).Build();
-        
-        var internalCommandsJob = JobBuilder.Create<ProcessInternalCommandsJob>().WithIdentity(nameof(ProcessInternalCommandsJob), messageProcessingJobGroup).Build();
-
-        await scheduler.ScheduleJob(
-            internalCommandsJob,
-            CreateJobTrigger(
-                 nameof(ProcessInternalCommandsJob),
-                 outboxOptions.JobProcessingInterval));
-
-        await scheduler.ScheduleJob(
-            outboxJob,
-            CreateJobTrigger(
-                nameof(ProcessOutboxMessagesJob),
-                internalCommandsOptions.JobProcessingInterval));
-    }
-
-    private static ITrigger CreateJobTrigger(string id, int processingInternval)
-    {
-        return TriggerBuilder
-                   .Create()
-                     .WithIdentity(id, messageProcessingJobGroup)
-                     .StartNow()                     
-                      .WithSimpleSchedule(x => x
-                           .WithIntervalInSeconds(processingInternval)
-                           .RepeatForever())
-                   .Build();
-    }
 }
 
 
