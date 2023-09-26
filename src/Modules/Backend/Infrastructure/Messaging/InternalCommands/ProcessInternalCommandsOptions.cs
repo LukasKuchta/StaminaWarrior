@@ -1,5 +1,5 @@
 ﻿namespace Backend.Infrastructure.Messaging.InternalCommands;
-internal sealed class ProcessInternalCommandsOptions
+public sealed class ProcessInternalCommandsOptions
 {
     public int JobProcessingInterval { get; init; }
 

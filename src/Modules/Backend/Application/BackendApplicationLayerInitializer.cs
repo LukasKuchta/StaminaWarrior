@@ -13,7 +13,7 @@ public static class BackendApplicationLayerInitializer
         services.AddMediatR(configuraton =>
         {
             configuraton.RegisterServicesFromAssembly(BackendApplicationAssembly.Instance);
-            configuraton.AddOpenBehavior(typeof(LoggingBehaviour<,>));
+            //configuraton.AddOpenBehavior(typeof(LoggingBehaviour<,>));
             configuraton.AddOpenBehavior(typeof(ValidationBehaviour<,>));
             configuraton.AddOpenBehavior(typeof(UnitOfWorkBehaviour<,>));
         });

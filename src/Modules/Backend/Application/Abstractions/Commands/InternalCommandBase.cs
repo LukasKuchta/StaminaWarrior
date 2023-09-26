@@ -1,11 +1,11 @@
 ﻿using Backend.Application.Contracts;
 
 namespace Backend.Application.Abstractions.Commands;
-public abstract record InternalCommandBase(Guid Id) : ICommand, IInternalCommand
+public abstract record InternalCommandBase(Guid Id) : ICommand, IInternalCommand, ICommandBase
 {
 }
 
-public abstract record InternalCommandBase<TResult>(Guid Id) : ICommand<TResult>, IInternalCommand<TResult>
+public abstract record InternalCommandBase<TResult>(Guid Id) : ICommand<TResult>, IInternalCommand<TResult>, ICommandBase
 {
 }
 

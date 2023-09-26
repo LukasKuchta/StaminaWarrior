@@ -3,7 +3,7 @@
 namespace Backend.Infrastructure.Repositories;
 internal class WarriorPathRepository : RepositoryBase<WarriorPath, WarriorPathId>, IWarriorPathRepository
 {
-    public WarriorPathRepository(ApplicationDbContext applicationDbContext) : base(applicationDbContext)
+    public WarriorPathRepository(BackendApplicationDbContext applicationDbContext) : base(applicationDbContext)
     {
     }
 }

@@ -11,14 +11,14 @@ using Newtonsoft.Json;
 namespace Backend.Infrastructure.Messaging.DomainEvents;
 internal sealed class DomainEventsDispatcher : IDomainEventsDispatcher
 {
-    private readonly ApplicationDbContext _applicationDbContext;
+    private readonly BackendApplicationDbContext _applicationDbContext;
     private readonly IPublisher _publisher;
     private readonly IPublicEventRegister _publicDomainEventRegister;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ISerializer _serializer;
 
     public DomainEventsDispatcher(
-        ApplicationDbContext applicationDbContext,
+        BackendApplicationDbContext applicationDbContext,
         IPublisher publisher,
         IPublicEventRegister publicDomainEventRegister,
         IDateTimeProvider dateTimeProvider,

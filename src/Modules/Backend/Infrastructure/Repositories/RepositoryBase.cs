@@ -8,9 +8,9 @@ internal abstract class RepositoryBase<TEntity, TEntityId>
     where TEntity : EntityBase<TEntityId>
     where TEntityId : class
 {
-    protected readonly ApplicationDbContext DbContext;
+    protected readonly BackendApplicationDbContext DbContext;
 
-    protected RepositoryBase(ApplicationDbContext applicationDbContext)
+    protected RepositoryBase(BackendApplicationDbContext applicationDbContext)
     {
         DbContext = applicationDbContext;
     }

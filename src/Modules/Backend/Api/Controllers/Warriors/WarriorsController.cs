@@ -1,8 +1,6 @@
-﻿using Backend.Application.Abstractions.Commands;
+﻿using Backend.Application.Contracts;
 using Backend.Application.Warriors.CreateWarrior;
-using Backend.Infrastructure;
-using Backend.Infrastructure.Messaging.InternalCommands;
-using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Api.Controllers.Warriors;
@@ -11,22 +9,11 @@ namespace Backend.Api.Controllers.Warriors;
 [Route("api/warriors")]
 public class WarriorsController : ControllerBase
 {
-    private readonly ICommandScheduler _commandScheduler;
-    private readonly ICommandExecutor _commandExecutor;
-    private readonly ApplicationDbContext _context;
-    private readonly ISender _sender;
-    private readonly IServiceProvider _prov;
+    private readonly IBackendModule _backendModule;
 
-    public WarriorsController(
-        ICommandScheduler commandScheduler,
-        ICommandExecutor commandExecutor,
-        ISender sender, IServiceProvider prov, ApplicationDbContext context)
+    public WarriorsController(IBackendModule backendModule)
     {
-        _commandScheduler = commandScheduler;
-        _commandExecutor = commandExecutor;
-        _sender = sender;
-        _prov = prov;
-        _context = context;
+        _backendModule = backendModule;
     }
 
     [HttpGet("{id}")]
@@ -34,6 +21,7 @@ public class WarriorsController : ControllerBase
     {
         //GetWarriorQuery query = new GetWarriorQuery(warriorId);
         //var result = await _sender.Send(query, cancellationToken);
+
 
         //return result.IsSuccess ? Ok(result.Value) : NotFound);
         return Ok();
@@ -58,23 +46,20 @@ public class WarriorsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> CreateWarrior(CreateWarriorRequest request, CancellationToken cancellationToken)
     {
-
         if (request is null)
         {
             throw new ArgumentNullException(nameof(request));
         }
 
-        for (var i = 0; i < 1; i++)
-        {
+        
 
-            var x = new CreateWarriorCommand(request.UserId, request.WarriorName);
-            _commandScheduler.Schedule<Guid>(x);
-        }
+        var result = await _backendModule.ExecuteCommandAsync(new CreateWarriorCommand(request.UserId, request.WarriorName));                
+        return CreatedAtAction(nameof(GetWarrior), new { Id = result }, result);
+  
 
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         // REST API convention
         // created 201 contains header location where to get created item and its id            
+        //return Ok();
         //return CreatedAtAction(nameof(GetWarrior), new { Id = result }, result);
-        return Ok();
     }
 }

@@ -22,7 +22,7 @@ internal sealed class UnitOfWorkBehaviour<TRequest, TResponse> : IPipelineBehavi
     {
         TResponse result = await next().ConfigureAwait(false);
 
-        if (request is IInternalCommand internalCommand)
+        if (request is InternalCommandBase internalCommand)
         {
             await _internalCommandMarker.MarkAsHandled(internalCommand.Id).ConfigureAwait(false);
         }

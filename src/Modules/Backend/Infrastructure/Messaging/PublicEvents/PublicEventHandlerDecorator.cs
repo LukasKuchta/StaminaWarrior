@@ -13,14 +13,14 @@ internal class PublicEventHandlerDecorator<T> : INotificationHandler<T>
     private readonly IDistributedLockFactory _distributedLockFactory;
     private readonly IDistributedCache _distributedCache;
     private readonly INotificationHandler<T> _decorated;
-    private readonly ApplicationDbContext _context;
+    private readonly BackendApplicationDbContext _context;
     private readonly IDateTimeProvider _dateTimeProvider;
 
     public PublicEventHandlerDecorator(
         IDistributedLockFactory distributedLockFactory,
         IDistributedCache distributedCache,
         INotificationHandler<T> decorated,
-        ApplicationDbContext context,
+        BackendApplicationDbContext context,
         IDateTimeProvider dateTimeProvider)
     {
         _distributedLockFactory = distributedLockFactory;

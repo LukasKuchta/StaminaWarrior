@@ -34,7 +34,13 @@ internal sealed class InternalCommand
 
     public void MarkAsProcessed(DateTime processedDate)
     {
-        ProcessedDate = processedDate;
+        ProcessedDate = processedDate;        
+    }
+
+    public void MarkAsProcessedWithError(DateTime processedDate, string? error)
+    {
+        MarkAsProcessed(processedDate);
+        // TODO error 
     }
 
     public static InternalCommand Create(

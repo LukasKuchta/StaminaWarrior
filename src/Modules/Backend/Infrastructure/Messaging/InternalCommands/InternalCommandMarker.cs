@@ -6,11 +6,11 @@ namespace Backend.Infrastructure.Messaging.InternalCommands;
 internal sealed class InternalCommandMarker : IInternalCommandMarker
 {
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly ApplicationDbContext _applicationDbContext;
+    private readonly BackendApplicationDbContext _applicationDbContext;
 
     public InternalCommandMarker(
         IDateTimeProvider dateTimeProvider,
-        ApplicationDbContext applicationDbContext)
+        BackendApplicationDbContext applicationDbContext)
     {
         _dateTimeProvider = dateTimeProvider;
         _applicationDbContext = applicationDbContext;

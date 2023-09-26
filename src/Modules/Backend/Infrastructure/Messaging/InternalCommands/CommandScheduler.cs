@@ -5,12 +5,12 @@ using Backend.Infrastructure.Serialization;
 namespace Backend.Infrastructure.Messaging.InternalCommands;
 internal class CommandScheduler : ICommandScheduler
 {
-    private readonly ApplicationDbContext _applicationDbContext;
+    private readonly BackendApplicationDbContext _applicationDbContext;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ISerializer _serializer;
 
     public CommandScheduler(
-        ApplicationDbContext applicationDbContext,
+        BackendApplicationDbContext applicationDbContext,
         IDateTimeProvider dateTimeProvider,
         ISerializer serializer)
     {

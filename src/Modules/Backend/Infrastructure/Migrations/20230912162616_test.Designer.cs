@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace StaminaWarrior.Server.Infrastructure.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(BackendApplicationDbContext))]
     [Migration("20230912162616_test")]
     partial class Test
     {

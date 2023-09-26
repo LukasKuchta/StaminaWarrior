@@ -2,9 +2,9 @@
 
 namespace Backend.Infrastructure
 {
-    public sealed class ApplicationDbContext : DbContext
+    public sealed class BackendApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(
+        public BackendApplicationDbContext(
             DbContextOptions options)
             : base(options)
         {
@@ -17,7 +17,7 @@ namespace Backend.Infrastructure
                 throw new ArgumentNullException(nameof(modelBuilder));
             }
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(BackendApplicationDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
         }
 

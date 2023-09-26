@@ -1,33 +1,37 @@
 ﻿using Backend.Application.Contracts;
+using Backend.Application.Warriors.CreateWarrior;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Infrastructure.Messaging.InternalCommands;
-internal sealed class CommandExecutor : ICommandExecutor
+internal static class CommandExecutor
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public CommandExecutor(IServiceScopeFactory serviceScopeFactory)
+    public static async Task ExecuteCommandAsync(ICommand command)
     {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
-
-    public async Task ExecuteCommandAsync(ICommand command)
-    {
-        using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+        using (IServiceScope scope = BackendCompositionRoot.CreateScope())
         {
             IMediator mediatro = scope.ServiceProvider.GetRequiredService<IMediator>();
             await mediatro.Send(command).ConfigureAwait(false);
         }
     }
 
-    public async Task<TResult> ExecuteCommandAsync<TResult>(ICommand<TResult> command)
+    public static async Task<TResult> ExecuteCommandAsync<TResult>(ICommand<TResult> command)
     {
-        using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+        using (IServiceScope scope = BackendCompositionRoot.CreateScope())
         {
-            IMediator mediatro = scope.ServiceProvider.GetRequiredService<IMediator>();
+            IMediator mediatro = scope.ServiceProvider.GetRequiredService<IMediator>();            
+            try
+            {
+
             var result = await mediatro.Send<TResult>(command).ConfigureAwait(false);
-            return result;
+                return result;
+            } catch (Exception ex)
+            {
+
+            }
+     
+
         }
+        return default(TResult);
     }
 }

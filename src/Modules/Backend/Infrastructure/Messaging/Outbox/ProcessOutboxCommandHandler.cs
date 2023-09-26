@@ -13,14 +13,14 @@ using Newtonsoft.Json;
 namespace Backend.Infrastructure.Messaging.Outbox;
 internal sealed class ProcessOutboxCommandHandler : IRequestHandler<ProcessOutboxCommand>
 {
-    private readonly ApplicationDbContext _context;
+    private readonly BackendApplicationDbContext _context;
     private readonly ISerializer _serializer;
     private readonly IPublicEventPublisher _publicEventPublisher;
     private readonly IDateTimeProvider _dateTimeProvider;
     private readonly ProcessOutboxMessagesOptions _outboxOptions;
 
     public ProcessOutboxCommandHandler(
-        ApplicationDbContext context,
+        BackendApplicationDbContext context,
         ISerializer serializer,
         IPublicEventPublisher publicDomainEventPublisher,
         IOptions<ProcessOutboxMessagesOptions> options,

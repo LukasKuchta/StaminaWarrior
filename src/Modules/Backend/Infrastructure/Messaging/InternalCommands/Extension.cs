@@ -1,5 +1,6 @@
 ﻿using Backend.Application.Abstractions.Clock;
 using Backend.Application.Abstractions.Commands;
+using Backend.Infrastructure.Clock;
 using Backend.Infrastructure.Exceptions;
 using Backend.Infrastructure.Serialization;
 
@@ -8,45 +9,32 @@ internal static class Extension
 {
     public static InternalCommand ToInternalCommand(this IInternalCommand internalCommand, ISerializer serializer, IDateTimeProvider dateTimeProvider)
     {
-        if (internalCommand is null)
-        {
-            throw new ArgumentNullException(nameof(internalCommand));
-        }
+        return CreateInternalCommand(internalCommand, serializer, dateTimeProvider);
+    }
 
-        string? typeFullName = internalCommand.GetType().FullName;
+    private static InternalCommand CreateInternalCommand(
+        IInternalCommand command,
+        ISerializer serializer,
+        IDateTimeProvider dateTimeProvider)
+    {
+        string? typeFullName = command.GetType().FullName;
         if (typeFullName is null)
         {
             throw new UnrecoginzedTypeFullNameException();
         }
 
+        string commandAsString = serializer.Serialize(command);
+
         return InternalCommand.Create(
-            Guid.NewGuid(),
-            internalCommand.Id,
-            typeFullName,
-            serializer.Serialize(internalCommand),
-            dateTimeProvider.UtcNow());
+       Guid.NewGuid(),
+       command.Id,
+       typeFullName,
+       commandAsString,
+       dateTimeProvider.UtcNow());
     }
 
     public static InternalCommand ToInternalCommand<TResult>(this IInternalCommand<TResult> internalCommand, ISerializer serializer, IDateTimeProvider dateTimeProvider)
     {
-        if (internalCommand is null)
-        {
-            throw new ArgumentNullException(nameof(internalCommand));
-        }
-
-        string? typeFullName = internalCommand.GetType().FullName;
-        if (typeFullName is null)
-        {
-            throw new UnrecoginzedTypeFullNameException();
-        }
-
-        string serialization = serializer.Serialize(internalCommand);
-
-        return InternalCommand.Create(
-            Guid.NewGuid(),
-            internalCommand.Id,
-            typeFullName,
-            serialization,
-            dateTimeProvider.UtcNow());
+        return CreateInternalCommand(internalCommand, serializer, dateTimeProvider);
     }
 }
